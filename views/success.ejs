@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deployment Success - WarpHost</title>
+    <style>
+        :root {
+            --primary-orange: #FF8C00;
+            --secondary-orange: #FFA500;
+            --gradient: linear-gradient(135deg, var(--secondary-orange) 0%, var(--primary-orange) 100%);
+            --text-dark: #2d3436;
+            --text-light: #636e72;
+            --bg-light: #fdfdfd;
+            --white: #ffffff;
+            --border-color: #dfe6e9;
+            --shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #fff5f0 0%, #fff9f5 100%);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .success-container {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            color: var(--primary-orange);
+        }
+
+        h1 {
+            color: var(--text-dark);
+            margin-bottom: 20px;
+        }
+
+        p {
+            color: var(--text-light);
+            margin-bottom: 30px;
+        }
+
+        .urls {
+            text-align: left;
+            background: rgba(255, 140, 0, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .url-item {
+            margin-bottom: 15px;
+        }
+
+        .url-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .url-label {
+            display: block;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .url-value {
+            display: block;
+            color: var(--primary-orange);
+            word-break: break-all;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background: var(--gradient);
+            color: var(--white);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <svg class="success-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h1>Deployment Successful!</h1>
+        <p>Your site has been successfully deployed to Cloudflare Pages.</p>
+
+
+        
+        
+        <div class="urls">
+            <div class="url-item">
+                <span class="url-label">Preview URL:</span>
+                <span class="url-value" data-preview-url="<%= previewUrl %>"><%= previewUrl %></span>
+            </div>
+            <div class="url-item">
+                <span class="url-label">Custom Domain:</span>
+                <span class="url-value" data-custom-domain-url="<%= customDomainUrl %>"><%= customDomainUrl %></span>
+            </div>
+            <div class="url-item">
+                <span class="url-label">Subdomain:</span>
+                <span class="url-value" data-subdomain="<%= subdomain %>"><%= subdomain %></span>
+            </div>
+        </div>
+
+        <a href="/dashboard" class="btn">Return to Dashboard</a>
+    </div>
+</body>
+</html> 

@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="WarpHost - Lightning fast static website hosting with instant deployment">
+    <title>WarpHost - Instant Futuristic Hosting</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- Reset & Base Styles --- */
+        :root {
+            --primary-orange: #FF8C00; /* Darker Orange */
+            --secondary-orange: #FFA500; /* Lighter Orange */
+            --gradient: linear-gradient(135deg, var(--secondary-orange) 0%, var(--primary-orange) 100%);
+            --text-dark: #2d3436; /* Darker Gray */
+            --text-light: #636e72; /* Medium Gray */
+            --bg-light: #fdfdfd; /* Very Light Gray/Off-white */
+            --white: #ffffff;
+            --border-color: #dfe6e9; /* Light Gray Border */
+            --shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 8px 25px rgba(255, 140, 0, 0.2); /* Orange Glow on Hover */
+            --shadow-intense: 0 10px 30px rgba(255, 165, 0, 0.25);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-dark);
+            line-height: 1.7;
+            background-color: var(--white);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased; /* Smoother fonts */
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 600;
+            margin-bottom: 0.75em;
+            line-height: 1.3;
+            color: var(--text-dark);
+        }
+
+        h1 { font-size: 3rem; font-weight: 700; }
+        h2 { font-size: 2.2rem; color: var(--primary-orange); }
+        h3 { font-size: 1.3rem; font-weight: 500; }
+        p { margin-bottom: 1em; color: var(--text-light); }
+        a { color: var(--secondary-orange); text-decoration: none; transition: color 0.3s ease; }
+        a:hover { color: var(--primary-orange); }
+        img, svg { max-width: 100%; height: auto; display: block; }
+
+        /* --- Utility Classes --- */
+        .container {
+            max-width: 1180px; /* Slightly wider */
+            margin: 0 auto;
+            padding: 0 20px; /* More padding */
+        }
+
+        .section {
+            padding: 90px 0;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.9s cubic-bezier(0.165, 0.84, 0.44, 1), transform 0.9s cubic-bezier(0.165, 0.84, 0.44, 1); /* Smoother ease */
+        }
+
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .section-title h2 {
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block; /* Needed for pseudo-element */
+        }
+        /* Subtle underline effect */
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: var(--gradient);
+            border-radius: 3px;
+        }
+
+        .section-title p {
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+            color: var(--text-light);
+            font-size: 1.05rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 35px;
+            border-radius: 50px; /* Fully rounded */
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.35s ease;
+            cursor: pointer;
+            border: none;
+            font-size: 1rem;
+            letter-spacing: 0.5px; /* Slight spacing */
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: var(--white);
+            box-shadow: var(--shadow);
+        }
+        .btn-primary:hover {
+            box-shadow: var(--shadow-hover); /* Orange glow */
+            transform: translateY(-3px);
+            filter: brightness(1.1);
+        }
+
+        .btn-secondary {
+             background-color: var(--white);
+             color: var(--primary-orange);
+             border: 2px solid var(--secondary-orange);
+             margin-left: 15px;
+        }
+         .btn-secondary:hover {
+             background: var(--secondary-orange);
+             color: var(--white);
+             border-color: var(--secondary-orange);
+             transform: translateY(-2px);
+             box-shadow: var(--shadow-hover);
+         }
+
+        /* --- Header --- */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            backdrop-filter: blur(8px);
+            padding: 18px 0;
+            transition: all 0.3s ease;
+        }
+
+        .header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2rem; /* Larger logo */
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -1px; /* Tighter spacing */
+        }
+
+        .nav-links a {
+            margin-left: 30px; /* More spacing */
+            font-weight: 500;
+            color: var(--text-dark);
+            position: relative; /* For hover effect */
+            padding-bottom: 5px;
+        }
+        .nav-links a::after { /* Underline hover effect */
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient);
+            transition: width 0.3s ease;
+        }
+         .nav-links a:hover {
+             color: var(--primary-orange);
+         }
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+
+        /* --- Hero Section --- */
+        .hero {
+            padding-top: 160px; /* Adjust for taller header */
+            padding-bottom: 100px;
+            background-color: var(--bg-light);
+            text-align: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Futuristic background elements */
+        .hero::before, .hero::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.08; /* Subtler opacity */
+            z-index: 0;
+            filter: blur(100px); /* Stronger blur */
+        }
+        .hero::before {
+            width: 450px; /* Larger */
+            height: 450px;
+            background: var(--secondary-orange);
+            top: -150px;
+            left: -200px;
+        }
+        .hero::after {
+             width: 550px; /* Larger */
+             height: 550px;
+             background: var(--primary-orange);
+             bottom: -200px;
+             right: -250px;
+        }
+
+        .hero .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            margin-bottom: 25px;
+            color: var(--text-dark);
+            line-height: 1.2;
+        }
+        .hero h1 span {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.15rem; /* Slightly larger */
+            max-width: 700px;
+            margin: 0 auto 40px auto;
+            color: var(--text-light);
+            font-weight: 300; /* Lighter weight */
+        }
+
+        .upload-area {
+            max-width: 550px;
+            margin: 50px auto 0 auto;
+            padding: 40px; /* More padding */
+            border: 2px dashed var(--border-color); /* Thinner dash */
+            border-radius: 25px; /* More rounded */
+            background-color: var(--white);
+            transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+        }
+        .upload-area:hover {
+            border-color: var(--secondary-orange);
+            transform: scale(1.03) translateY(-5px); /* Slightly bigger lift */
+            box-shadow: var(--shadow-intense); /* More prominent orange glow */
+        }
+        .upload-area svg {
+            width: 55px;
+            height: 55px;
+            margin: 0 auto 20px auto;
+            color: var(--primary-orange);
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+         .upload-area:hover svg {
+             opacity: 1;
+         }
+        .upload-area p {
+             margin-bottom: 5px; /* Adjusted spacing */
+             font-weight: 500;
+             font-size: 1.1rem;
+             color: var(--text-dark);
+         }
+         .upload-area span {
+             font-size: 0.9rem;
+             color: var(--text-light);
+             display: block;
+         }
+
+        /* --- Features Section --- */
+        .features {
+             background-color: var(--white);
+             position: relative;
+             overflow: hidden;
+        }
+         /* Optional: Subtle background pattern */
+         .features::before {
+             content: '';
+             position: absolute;
+             top: 0;
+             left: 0;
+             width: 100%;
+             height: 100%;
+             /* Example using subtle dots - replace with SVG or other patterns if desired */
+             background-image: radial-gradient(var(--border-color) 1px, transparent 1px);
+             background-size: 20px 20px;
+             opacity: 0.3;
+             z-index: 0;
+         }
+
+        .features .container {
+             position: relative;
+             z-index: 1;
+         }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Wider cards */
+            gap: 35px; /* More gap */
+            margin-top: 50px;
+        }
+        .feature-card {
+            background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent */
+            backdrop-filter: blur(5px); /* Subtle blur on cards */
+            padding: 35px;
+            border-radius: 15px; /* Softer radius */
+            box-shadow: var(--shadow);
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: transform 0.35s ease, box-shadow 0.35s ease;
+            z-index: 1; /* Above potential background pattern */
+        }
+        .feature-card:hover {
+            transform: translateY(-8px) scale(1.02); /* More pronounced hover */
+            box-shadow: var(--shadow-hover);
+        }
+        .feature-icon {
+            width: 65px; /* Larger icon bg */
+            height: 65px;
+            margin: 0 auto 25px auto;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--white);
+            box-shadow: 0 4px 10px rgba(255, 165, 0, 0.3); /* Icon shadow */
+        }
+        .feature-icon svg {
+            width: 32px; /* Slightly larger icon */
+            height: 32px;
+        }
+        .feature-card h3 {
+            margin-bottom: 12px;
+            color: var(--primary-orange);
+        }
+        .feature-card p {
+            font-size: 0.95rem;
+        }
+
+        /* --- How It Works Section --- */
+        .how-it-works {
+            background-color: var(--bg-light);
+        }
+        .steps-container {
+            display: flex;
+            flex-direction: column;
+            gap: 45px; /* More gap */
+            max-width: 800px;
+            margin: 50px auto 0 auto;
+            position: relative;
+        }
+        /* Refined Connecting line */
+        .steps-container::before {
+             content: '';
+             position: absolute;
+             left: 29px;
+             top: 15px;
+             bottom: 15px;
+             width: 2px;
+             background: linear-gradient(to bottom, var(--secondary-orange), var(--primary-orange), var(--secondary-orange)); /* Gradient line */
+             opacity: 0.5;
+             border-radius: 2px;
+             z-index: 0;
+        }
+
+        .step {
+            display: flex;
+            align-items: center; /* Vertically center align */
+            gap: 30px;
+            position: relative;
+            z-index: 1;
+            background-color: var(--bg-light); /* Needs bg to obscure line */
+            padding: 15px 0;
+        }
+        .step-number {
+            flex-shrink: 0;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--gradient);
+            color: var(--white);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.6rem;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+         .step:hover .step-number {
+             transform: scale(1.1); /* Pop effect on step hover */
+         }
+        .step-content h3 {
+            margin-bottom: 8px;
+            color: var(--primary-orange);
+        }
+        .step-content p {
+            margin-bottom: 0;
+            font-size: 0.98rem;
+        }
+
+        /* --- CTA Section --- */
+        .cta {
+            background: var(--gradient);
+            color: var(--white);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        /* Add subtle pattern to CTA background */
+        .cta::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M0 38.59l2.83-2.83 1.41 1.41L1.41 40H0v-1.41zM0 1.4l2.83 2.83 1.41-1.41L1.41 0H0v1.41zM38.59 40l-2.83-2.83 1.41-1.41L40 38.59V40h-1.41zM40 1.41l-2.83 2.83-1.41-1.41L38.59 0H40v1.41zM20 18.6l-2.83-2.83 1.41-1.41L20 17.17l2.83-2.83 1.41 1.41L21.41 20l2.83 2.83-1.41 1.41L20 22.83l-2.83 2.83-1.41-1.41L18.59 20l-2.83-2.83 1.41-1.41L20 18.59z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            z-index: 0;
+        }
+
+        .cta .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta h2 {
+            color: var(--white);
+            font-size: 2.5rem; /* Larger CTA heading */
+            font-weight: 700;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .cta p {
+            color: rgba(255, 255, 255, 0.95);
+            max-width: 650px;
+            margin: 0 auto 35px auto;
+            font-size: 1.1rem;
+        }
+        .cta .btn { /* CTA button style */
+            background-color: var(--white);
+            color: var(--primary-orange);
+            border: none;
+            padding: 15px 40px; /* Larger CTA button */
+            font-size: 1.1rem;
+        }
+        .cta .btn:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* --- Footer --- */
+        .footer {
+            background-color: var(--text-dark);
+            color: rgba(255, 255, 255, 0.6);
+            padding: 50px 0;
+            text-align: center;
+        }
+        .footer .container {
+             display: flex;
+             flex-direction: column;
+             align-items: center;
+             gap: 20px;
+        }
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.6);
+            margin: 0 12px;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+        .footer-links a:hover {
+            color: var(--secondary-orange); /* Orange hover in footer */
+        }
+        .footer p {
+            margin-bottom: 0;
+            font-size: 0.9rem;
+        }
+        .footer p span { /* Heart color */
+            color: var(--secondary-orange);
+        }
+
+        /* --- Responsiveness --- */
+        @media (max-width: 992px) {
+            h1 { font-size: 2.6rem; }
+            h2 { font-size: 2rem; }
+            .container { max-width: 960px; padding: 0 15px;}
+            .section { padding: 70px 0; }
+            .hero { padding-top: 140px; }
+            .features-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.3rem; }
+            .header { padding: 15px 0; backdrop-filter: blur(6px); }
+            .header .container { flex-direction: column; gap: 12px;}
+            .nav-links { margin-top: 10px; }
+            .nav-links a { margin: 0 12px; }
+            .hero { padding-top: 160px; /* Increased for stacked header */ }
+            .hero p { font-size: 1.1rem; max-width: 90%; }
+            .upload-area { max-width: 90%; padding: 30px; }
+            .steps-container::before { left: 24px; }
+            .step-number { width: 50px; height: 50px; font-size: 1.4rem; }
+            .step { gap: 20px; align-items: flex-start; } /* Adjust alignment for potentially wrapping text */
+            .cta h2 { font-size: 2.1rem; }
+        }
+
+        @media (max-width: 576px) {
+             h1 { font-size: 2rem; }
+             h2 { font-size: 1.8rem; }
+             .section { padding: 60px 0; }
+             .hero { padding-top: 150px; }
+             .hero p { font-size: 1rem; }
+             .btn { padding: 12px 30px; font-size: 0.95rem; }
+             .btn-secondary { margin-left: 0; margin-top: 15px; display: block; width: fit-content; margin: 15px auto 0 auto; } /* Stack buttons */
+             .upload-area { padding: 25px; }
+             .upload-area svg { width: 45px; height: 45px; margin-bottom: 15px;}
+             .upload-area p { font-size: 1rem; }
+             .feature-card { padding: 30px 25px; }
+             .steps-container::before { display: none; }
+             .step { flex-direction: column; align-items: center; text-align: center; }
+             .step-number { margin-bottom: 15px; }
+             .cta h2 { font-size: 1.9rem; }
+             .cta p { font-size: 1rem; }
+             .cta .btn { padding: 14px 35px; font-size: 1rem; }
+             .footer .container { gap: 15px; }
+             .footer-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px 15px; }
+             .footer-links a { margin: 0; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header" role="banner">
+        <div class="container">
+            <a href="#" class="logo" aria-label="WarpHost Homepage">WarpHost</a>
+            <nav class="nav-links" role="navigation" aria-label="Main navigation">
+                <a href="#features" aria-label="View Features">Features</a>
+                <a href="#how-it-works" aria-label="Learn How It Works">How It Works</a>
+                <a href="/signup" aria-label="Create an account">Sign Up</a>
+                <a href="/login" aria-label="Login to your account">Login</a>
+            </nav>
+        </div>
+    </header>
+
+    <main role="main">
+        <!-- Hero Section -->
+        <section class="hero section" id="home" aria-labelledby="hero-title">
+            <div class="container">
+                <h1 id="hero-title">Experience <span>Warp Speed</span> Hosting</h1>
+                <p>Deploy your websites instantly with our lightning-fast platform. Simple, secure, and blazingly fast deployment in seconds.</p>
+                <div class="upload-area" 
+                     role="button" 
+                     tabindex="0" 
+                     aria-label="Upload your website files"
+                     onclick="handleUpload()"
+                     onkeypress="(e) => e.key === 'Enter' && handleUpload()">
+                    <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="48" height="48">
+                        <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+                    </svg>
+                    <p>Drag & Drop Your Site Files (or .zip)</p>
+                    <span>Initiate Deployment Sequence</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features section" id="features" aria-labelledby="features-title">
+            <div class="container">
+                <div class="section-title">
+                    <h2 id="features-title">Core Advantages</h2>
+                    <p>Engineered for performance, simplicity, and reliability in the modern web.</p>
+                </div>
+                <div class="features-grid">
+                    <article class="feature-card">
+                        <div class="feature-icon" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                            </svg>
+                        </div>
+                        <h3>Hyperdrive CDN</h3>
+                        <p>Global edge network ensures lightning-fast load times, wherever your users are.</p>
+                    </article>
+                    <article class="feature-card">
+                        <div class="feature-icon" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <h3>Zero-Config Upload</h3>
+                        <p>No complex dashboards. Drag your static files or zip archive, and you're live.</p>
+                    </article>
+                    <article class="feature-card">
+                        <div class="feature-icon" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9.75L17.25 8.25M17.25 8.25L18.75 9.75M17.25 8.25v6.75m-6-6.75L9.75 8.25m0 0L8.25 9.75M9.75 8.25v6.75m5.25-6.75L13.5 9.75m0 0L12 8.25m1.5 1.5v6.75" opacity="0.5"/>
+                            </svg>
+                        </div>
+                        <h3>Ironclad Security</h3>
+                        <p>Automatic HTTPS via free SSL certificates and a robust, secure infrastructure.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section class="how-it-works section" id="how-it-works" aria-labelledby="how-it-works-title">
+            <div class="container">
+                <div class="section-title">
+                    <h2 id="how-it-works-title">Launch Sequence Initiated</h2>
+                    <p>Go from local files to live website in three streamlined phases.</p>
+                </div>
+                <div class="steps-container" role="list">
+                    <div class="step" role="listitem">
+                        <div class="step-number" aria-hidden="true">1</div>
+                        <div class="step-content">
+                            <h3>Compile Assets</h3>
+                            <p>Assemble your static site files (HTML, CSS, JS, assets) or compress into a single .zip archive.</p>
+                        </div>
+                    </div>
+                    <div class="step" role="listitem">
+                        <div class="step-number" aria-hidden="true">2</div>
+                        <div class="step-content">
+                            <h3>Engage Upload Interface</h3>
+                            <p>Drag & drop your prepared files or archive onto the designated upload zone on our platform.</p>
+                        </div>
+                    </div>
+                    <div class="step" role="listitem">
+                        <div class="step-number" aria-hidden="true">3</div>
+                        <div class="step-content">
+                            <h3>Achieve Orbit!</h3>
+                            <p>Our system instantly deploys your site to the edge network, providing a globally accessible URL.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Call to Action (CTA) Section -->
+        <section class="cta section" id="cta" aria-labelledby="cta-title">
+            <div class="container">
+                <h2 id="cta-title">Ready for Instant Deployment?</h2>
+                <p>Join the next generation of web creators. Upload your site now and experience the fastest, simplest hosting solution.</p>
+                <a href="#" class="btn" role="button">Deploy Your Site Now</a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <div class="container">
+            <nav class="footer-links" aria-label="Footer navigation">
+                <a href="#">Terms of Service</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">System Status</a>
+                <a href="#">Contact Support</a>
+            </nav>
+            <p>© <span id="year"></span> WarpHost. All rights reserved. Built with <span aria-hidden="true">⚡</span><span class="sr-only">lightning speed</span>.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Year update
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Upload handler
+        function handleUpload() {
+            // You can implement actual upload logic here
+            alert('Upload functionality will be implemented soon!');
+        }
+
+        // Intersection Observer for animations
+        const sections = document.querySelectorAll('.section');
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            },
+            {
+                threshold: 0.15
+            }
+        );
+
+        sections.forEach(section => observer.observe(section));
+
+        // Header scroll effect
+        const header = document.querySelector('.header');
+        window.addEventListener('scroll', () => {
+            const scrolled = window.scrollY > 50;
+            header.style.backgroundColor = scrolled ? 
+                'rgba(255, 255, 255, 0.95)' : 
+                'rgba(255, 255, 255, 0.9)';
+            header.style.boxShadow = scrolled ?
+                '0 4px 15px rgba(0,0,0,0.07)' :
+                '0 2px 10px rgba(0,0,0,0.05)';
+        });
+    </script>
+
+</body>
+</html>

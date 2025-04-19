@@ -1,0 +1,37 @@
+{
+  "name": "tinyhost",
+  "version": "1.0.0",
+  "description": "A minimal file-sharing/deploying SaaS using Express.js and Cloudflare Pages",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [
+    "file-sharing",
+    "deployment",
+    "cloudflare",
+    "express"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "adm-zip": "^0.5.16",
+    "archiver": "^7.0.1",
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.2",
+    "connect-pg-simple": "^10.0.0",
+    "dotenv": "^16.3.1",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "express-session": "^1.18.1",
+    "extract-zip": "^2.0.1",
+    "multer": "^1.4.5-lts.1",
+    "node-fetch": "^2.7.0",
+    "pg": "^8.14.1",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}

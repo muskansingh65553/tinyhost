@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="WarpHost Dashboard - Manage your websites">
+    <title>Dashboard - WarpHost</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Import base styles from home.ejs */
+        :root {
+            --primary-orange: #FF8C00;
+            --secondary-orange: #FFA500;
+            --gradient: linear-gradient(135deg, var(--secondary-orange) 0%, var(--primary-orange) 100%);
+            --text-dark: #2d3436;
+            --text-light: #636e72;
+            --bg-light: #fdfdfd;
+            --white: #ffffff;
+            --border-color: #dfe6e9;
+            --shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 8px 25px rgba(255, 140, 0, 0.2);
+            --shadow-intense: 0 10px 30px rgba(255, 165, 0, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #fff5f0 0%, #fff9f5 100%);
+            color: var(--text-dark);
+            line-height: 1.7;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 40px);
+            max-width: 1200px;
+            z-index: 1000;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(8px);
+            padding: 18px 30px;
+            transition: all 0.3s ease;
+            border-radius: 20px;
+        }
+
+        .container {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            color: transparent;
+            text-decoration: none;
+            letter-spacing: -1px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            font-weight: 500;
+            color: var(--text-dark);
+            text-decoration: none;
+            position: relative;
+            padding: 8px 15px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-orange);
+            background: rgba(255, 140, 0, 0.08);
+        }
+
+        /* Dashboard Styles */
+        .dashboard-section {
+            padding-top: 120px;
+            padding-bottom: 40px;
+            flex: 1;
+        }
+
+        .welcome-bar {
+            background: var(--gradient);
+            padding: 30px 0;
+            margin-bottom: 40px;
+            color: var(--white);
+        }
+
+        .welcome-bar h1 {
+            color: var(--white);
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .welcome-bar p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .stat-card h3 {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-orange);
+        }
+
+        .upload-container {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: var(--shadow);
+            margin-bottom: 40px;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-orange);
+            background-color: rgba(255, 140, 0, 0.02);
+        }
+
+        .upload-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 20px;
+            color: var(--primary-orange);
+        }
+
+        .sites-list {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: var(--shadow);
+        }
+
+        .sites-list h2 {
+            color: var(--text-dark);
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sites-list h2::before {
+            content: '';
+            display: block;
+            width: 4px;
+            height: 24px;
+            background: var(--gradient);
+            border-radius: 2px;
+        }
+
+        .site-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px;
+            border-radius: 15px;
+            background: var(--bg-light);
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .site-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .site-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary-orange);
+            background: var(--white);
+        }
+
+        .site-info {
+            flex: 1;
+        }
+
+        .site-info h3 {
+            color: var(--text-dark);
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .site-info h3::after {
+            content: '•';
+            display: inline-block;
+            color: #2ecc71;
+            font-size: 1.5rem;
+            line-height: 0;
+            margin-top: -2px;
+        }
+
+        .site-info p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .site-info p::before {
+            content: '';
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23636e72'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9'%3E%3C/path%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+
+        .site-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn::before {
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+
+        .btn-view {
+            background: var(--gradient);
+            color: var(--white);
+            border: none;
+        }
+
+        .btn-view::before {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M15 12a3 3 0 11-6 0 3 3 0 016 0z'%3E%3C/path%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z'%3E%3C/path%3E%3C/svg%3E");
+        }
+
+        .btn-delete {
+            background: transparent;
+            color: #ff4757;
+            border: 1px solid #ff4757;
+        }
+
+        .btn-delete::before {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23ff4757'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'%3E%3C/path%3E%3C/svg%3E");
+        }
+
+        .btn-delete:hover {
+            background: #ff4757;
+            color: var(--white);
+        }
+
+        .btn-delete:hover::before {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'%3E%3C/path%3E%3C/svg%3E");
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 30px;
+            color: var(--text-light);
+            background: var(--bg-light);
+            border-radius: 15px;
+            border: 2px dashed var(--border-color);
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        /* Loading Animation */
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header {
+                top: 15px;
+                width: calc(100% - 30px);
+                padding: 15px 20px;
+            }
+
+            .header .container {
+                flex-direction: row;
+                gap: 0;
+            }
+
+            .nav-links {
+                gap: 15px;
+            }
+
+            .nav-links a {
+                padding: 6px 12px;
+                font-size: 0.95rem;
+            }
+
+            .logo {
+                font-size: 1.6rem;
+            }
+
+            .dashboard-section {
+                padding-top: 100px;
+            }
+            .welcome-bar h1 { font-size: 1.8rem; }
+            .stat-card { padding: 20px; }
+            .upload-container { padding: 20px; }
+            .upload-area { padding: 30px; }
+            .sites-list {
+                padding: 30px 20px;
+            }
+            .site-item {
+                padding: 20px;
+            }
+            .site-info h3 {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .header {
+                top: 10px;
+                width: calc(100% - 20px);
+                padding: 12px 15px;
+            }
+
+            .nav-links {
+                gap: 8px;
+            }
+
+            .nav-links a {
+                padding: 5px 10px;
+                font-size: 0.9rem;
+            }
+
+            .logo {
+                font-size: 1.4rem;
+            }
+
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .site-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+            .site-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .btn {
+                flex: 1;
+                justify-content: center;
+            }
+            .dashboard-section {
+                padding-top: 90px;
+            }
+        }
+
+        /* Add these styles to your existing CSS */
+        .progress-container {
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--border-color);
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0;
+            background: var(--gradient);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-stages {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            position: relative;
+        }
+
+        .progress-stages::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--border-color);
+            z-index: 0;
+        }
+
+        .stage {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .stage-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--white);
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+
+        .stage-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .stage.active .stage-icon {
+            background: var(--gradient);
+            border-color: var(--primary-orange);
+            color: var(--white);
+        }
+
+        .stage.active .stage-label {
+            color: var(--primary-orange);
+        }
+
+        .stage.completed .stage-icon {
+            background: var(--primary-orange);
+            border-color: var(--primary-orange);
+            color: var(--white);
+        }
+
+        .stage.completed .stage-label {
+            color: var(--primary-orange);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .stage.active .stage-icon {
+            animation: pulse 1.5s infinite;
+        }
+
+        /* Add these styles before the @media queries */
+        .subdomain-dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--white);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-intense);
+            width: 90%;
+            max-width: 500px;
+            z-index: 1000;
+            text-align: center;
+        }
+
+        .subdomain-dialog h3 {
+            color: var(--text-dark);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .subdomain-dialog p {
+            color: var(--text-light);
+            margin-bottom: 25px;
+        }
+
+        .subdomain-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 5px;
+            border: 2px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .subdomain-input-group input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 12px;
+            font-size: 1rem;
+            color: var(--text-dark);
+            outline: none;
+        }
+
+        .subdomain-input-group .domain {
+            color: var(--text-light);
+            padding-right: 12px;
+            font-size: 0.95rem;
+        }
+
+        .subdomain-error {
+            color: #ff4757;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .dialog-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn-cancel {
+            background: var(--bg-light);
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 999;
+        }
+
+        /* Add new styles for domain status badges */
+        .domain-status {
+            display: none;
+        }
+
+        .domain-status-badge {
+            display: none;
+        }
+
+        .domain-status-badge.pending {
+            display: none;
+        }
+
+        .domain-status-badge.active {
+            display: none;
+        }
+
+        .domain-status-badge.error {
+            display: none;
+        }
+
+        .domain-status-badge .status-dot {
+            display: none;
+        }
+
+        .domain-status-badge.pending .status-dot {
+            display: none;
+        }
+
+        .domain-status-badge .protocol-warning {
+            display: none;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Add loading animation */
+        .loading-dots::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60% { content: '...'; }
+            80%, 100% { content: ''; }
+        }
+    </style>
+    <script>
+        function showDeleteConfirmation(subdomain) {
+            document.getElementById('deleteSubdomain').value = '';
+            document.getElementById('deleteConfirmationDialog').style.display = 'block';
+            document.getElementById('deleteOverlay').style.display = 'block';
+            document.getElementById('confirmDeleteBtn').onclick = function() {
+                const confirmText = document.getElementById('deleteSubdomain').value;
+                if (confirmText === 'DELETE') {
+                    deleteSite(subdomain);
+                    hideDeleteConfirmation();
+                } else {
+                    document.getElementById('deleteError').style.display = 'block';
+                }
+            };
+        }
+
+        function hideDeleteConfirmation() {
+            document.getElementById('deleteConfirmationDialog').style.display = 'none';
+            document.getElementById('deleteOverlay').style.display = 'none';
+            document.getElementById('deleteError').style.display = 'none';
+        }
+    </script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header" role="banner">
+        <div class="container">
+            <a href="/" class="logo" aria-label="WarpHost Homepage">WarpHost</a>
+            <nav class="nav-links" role="navigation" aria-label="Main navigation">
+                <a href="/dashboard">Dashboard</a>
+                <a href="/settings">Settings</a>
+                <a href="/logout">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Welcome Bar
+    <div class="welcome-bar">
+        <div class="container">
+            <h1>Welcome, <%= user.firstName %>!</h1>
+            <p>Manage your websites and deployments</p>
+        </div>
+    </div> -->
+
+    <!-- Dashboard Content -->
+    <section class="dashboard-section">
+        <div class="container">
+            <!-- Stats Grid -->
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <h3>Active Sites</h3>
+                    <div class="number"><%= sitesCount %></div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Deployments</h3>
+                    <div class="number">12</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Visitors</h3>
+                    <div class="number">1.2K</div>
+                </div>
+            </div>
+
+            <!-- Upload Container -->
+            <div class="upload-container">
+                <div class="upload-area" id="uploadArea">
+                    <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <h3>Deploy a New Site</h3>
+                    <p>Drag & drop your files or click to browse</p>
+                    <input type="file" id="fileInput" multiple style="display: none;">
+                </div>
+            </div>
+
+            <!-- Sites List -->
+            <div class="sites-list">
+                <h2>Your Sites</h2>
+                <div class="sites-container">
+                    <% if (sites && sites.length > 0) { %>
+                        <% sites.forEach(function(site) { %>
+                            <div class="site-item" data-subdomain="<%= site.subdomain %>">
+                                <div class="site-info">
+                                    <h3><%= site.subdomain %></h3>
+                                    <p><%= site.custom_domain_url %></p>
+                                </div>
+                                <div class="site-actions">
+                                    <a href="<%= site.custom_domain_url %>" target="_blank" class="btn btn-view" style="text-decoration: none;">View Site</a>
+                                    <a href="/filemanager/<%= site.subdomain %>" class="btn btn-secondary">Edit Files</a>
+                                    <button class="btn btn-delete" onclick="showDeleteConfirmation('<%= site.subdomain %>')">Delete</button>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="empty-state">
+                            <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                            <p>No sites deployed yet. Deploy your first site above!</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // File Upload Handling
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = 'var(--primary-orange)';
+            uploadArea.style.backgroundColor = 'rgba(255, 140, 0, 0.05)';
+        });
+
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '';
+            uploadArea.style.backgroundColor = '';
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const files = e.dataTransfer.files;
+            handleFiles(files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        async function handleFiles(files) {
+            if (files.length > 0) {
+                // Create and show the subdomain dialog
+                const overlay = document.createElement('div');
+                overlay.className = 'overlay';
+                document.body.appendChild(overlay);
+
+                const dialog = document.createElement('div');
+                dialog.className = 'subdomain-dialog';
+                dialog.innerHTML = `
+                    <h3>Choose Your Subdomain</h3>
+                    <p>Enter a unique subdomain for your site</p>
+                    <div class="subdomain-input-group">
+                        <input type="text" id="subdomainInput" placeholder="your-site" 
+                               pattern="[a-z0-9-]+" maxlength="30"
+                               title="Only lowercase letters, numbers, and hyphens are allowed">
+                        <span class="domain">.visual-html-editor.online</span>
+                    </div>
+                    <div class="subdomain-error" id="subdomainError"></div>
+                    <div class="dialog-buttons">
+                        <button class="btn btn-cancel" id="cancelButton">Cancel</button>
+                        <button class="btn btn-view" id="continueButton">Continue</button>
+                    </div>
+                `;
+                document.body.appendChild(dialog);
+
+                const subdomainInput = dialog.querySelector('#subdomainInput');
+                const subdomainError = dialog.querySelector('#subdomainError');
+                const continueButton = dialog.querySelector('#continueButton');
+                const cancelButton = dialog.querySelector('#cancelButton');
+
+                // Handle input validation
+                subdomainInput.addEventListener('input', (e) => {
+                    const value = e.target.value.toLowerCase();
+                    // Replace any character that's not a-z, 0-9, or hyphen
+                    const sanitized = value.replace(/[^a-z0-9-]/g, '');
+                    if (value !== sanitized) {
+                        e.target.value = sanitized;
+                    }
+                    
+                    subdomainError.style.display = 'none';
+                    continueButton.disabled = !sanitized;
+                });
+
+                try {
+                    // Wait for user input
+                    const subdomain = await new Promise((resolve, reject) => {
+                        continueButton.addEventListener('click', async () => {
+                            const value = subdomainInput.value.trim().toLowerCase();
+                            if (!value) {
+                                subdomainError.textContent = 'Please enter a subdomain';
+                                subdomainError.style.display = 'block';
+                                return;
+                            }
+
+                            // Validate subdomain format
+                            if (!/^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(value)) {
+                                subdomainError.textContent = 'Subdomain must start and end with a letter or number, and can only contain letters, numbers, and hyphens';
+                                subdomainError.style.display = 'block';
+                                return;
+                            }
+
+                            // Check if subdomain is available
+                            try {
+                                const response = await fetch(`/check-subdomain/${value}`);
+                                const data = await response.json();
+                                
+                                if (!data.available) {
+                                    subdomainError.textContent = 'This subdomain is already taken';
+                                    subdomainError.style.display = 'block';
+                                    return;
+                                }
+
+                                resolve(value);
+                            } catch (error) {
+                                subdomainError.textContent = 'Error checking subdomain availability';
+                                subdomainError.style.display = 'block';
+                            }
+                        });
+
+                        cancelButton.addEventListener('click', () => {
+                            reject(new Error('Cancelled by user'));
+                        });
+                    });
+
+                    // Clean up dialog
+                    document.body.removeChild(dialog);
+                    document.body.removeChild(overlay);
+
+                    // Create FormData and append files
+                    const formData = new FormData();
+                    formData.append('subdomain', subdomain);
+                    
+                    // If it's a single ZIP file, send it directly
+                    if (files.length === 1 && files[0].name.toLowerCase().endsWith('.zip')) {
+                        formData.append('zipFile', files[0]);
+                    } else {
+                        // Add all files to FormData
+                        Array.from(files).forEach(file => {
+                            formData.append('files', file);
+                        });
+                    }
+
+                    // Show loading state
+                    uploadArea.innerHTML = `
+                        <svg class="upload-icon loading-spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        <h3>Processing your files...</h3>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill"></div>
+                            </div>
+                            <div class="progress-stages">
+                                <div class="stage" data-stage="1">
+                                    <div class="stage-icon">1</div>
+                                    <div class="stage-label">Processing</div>
+                                </div>
+                                <div class="stage" data-stage="2">
+                                    <div class="stage-icon">2</div>
+                                    <div class="stage-label">Preparing</div>
+                                </div>
+                                <div class="stage" data-stage="3">
+                                    <div class="stage-icon">3</div>
+                                    <div class="stage-label">Deploying</div>
+                                </div>
+                                <div class="stage" data-stage="4">
+                                    <div class="stage-icon">4</div>
+                                    <div class="stage-label">Finishing</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    // Start the upload with proper headers
+                    const response = await fetch('/deploy', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Upload failed');
+                    }
+
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+
+                        const text = decoder.decode(value);
+                        const lines = text.split('\n');
+
+                        for (const line of lines) {
+                            if (line.startsWith('data: ')) {
+                                try {
+                                    const data = JSON.parse(line.slice(6));
+                                    console.log('Progress update:', data);
+
+                                    // Update progress bar
+                                    const progressFill = uploadArea.querySelector('.progress-fill');
+                                    const progress = (data.stage / 10) * 100;
+                                    progressFill.style.width = `${progress}%`;
+
+                                    // Update stages
+                                    const stages = uploadArea.querySelectorAll('.stage');
+                                    stages.forEach(stage => {
+                                        const stageNum = parseInt(stage.dataset.stage);
+                                        if (stageNum <= Math.ceil(data.stage / 2.5)) {
+                                            stage.classList.add('completed');
+                                            stage.classList.remove('active');
+                                        } else if (stageNum === Math.ceil((data.stage + 1) / 2.5)) {
+                                            stage.classList.add('active');
+                                            stage.classList.remove('completed');
+                                        } else {
+                                            stage.classList.remove('active', 'completed');
+                                        }
+                                    });
+
+                                    // Update status message
+                                    const statusMessage = uploadArea.querySelector('h3');
+                                    if (statusMessage) {
+                                        statusMessage.textContent = data.message;
+                                    }
+
+                                    // Handle completion
+                                    if (data.completed) {
+                                        const sitesContainer = document.querySelector('.sites-container');
+                                        const emptyState = sitesContainer.querySelector('.empty-state');
+                                        
+                                        // Create new site item
+                                        const newSiteItem = document.createElement('div');
+                                        newSiteItem.className = 'site-item';
+                                        newSiteItem.setAttribute('data-subdomain', data.subdomain);
+                                        
+                                        newSiteItem.innerHTML = `
+                                            <div class="site-info">
+                                                <h3>${data.subdomain}</h3>
+                                                <p>${data.customDomainUrl}</p>
+                                            </div>
+                                            <div class="site-actions">
+                                                <a href="${data.customDomainUrl}" target="_blank" class="btn btn-view" style="text-decoration: none;">View Site</a>
+                                                <a href="/filemanager/${data.subdomain}" class="btn btn-secondary">Edit Files</a>
+                                                <button class="btn btn-delete" onclick="showDeleteConfirmation('${data.subdomain}')">Delete</button>
+                                            </div>
+                                        `;
+                                        
+                                        // If empty state exists, remove it
+                                        if (emptyState) {
+                                            emptyState.remove();
+                                        }
+                                        
+                                        // Add the new site item at the beginning of the container
+                                        sitesContainer.insertBefore(newSiteItem, sitesContainer.firstChild);
+                                        
+                                        // Update the active sites count in the stats grid
+                                        const activeSitesCount = document.querySelector('.stat-card .number');
+                                        if (activeSitesCount) {
+                                            const currentCount = parseInt(activeSitesCount.textContent);
+                                            activeSitesCount.textContent = (currentCount + 1).toString();
+                                        }
+                                        
+                                        // Show success message
+                                        uploadArea.innerHTML = `
+                                            <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#22c55e">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            <h3>Deployment Successful!</h3>
+                                            <p>Your site is now live at <a href="${data.customDomainUrl}" target="_blank" class="text-primary-orange">${data.customDomainUrl}</a></p>
+                                        `;
+                                        
+                                        setTimeout(() => {
+                                            resetUploadArea();
+                                        }, 5000);
+
+                                        break;
+                                    }
+                                } catch (e) {
+                                    console.error('Error parsing SSE data:', e);
+                                }
+                            }
+                        }
+                    }
+                } catch (error) {
+                    // Clean up dialog if it exists
+                    if (document.body.contains(dialog)) {
+                        document.body.removeChild(dialog);
+                    }
+                    if (document.body.contains(overlay)) {
+                        document.body.removeChild(overlay);
+                    }
+
+                    if (error.message === 'Cancelled by user') {
+                        resetUploadArea();
+                    } else {
+                        console.error('Deployment error:', error);
+                        uploadArea.innerHTML = `
+                            <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#ff4757">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <h3>Deployment Failed</h3>
+                            <p>${error.message}</p>
+                        `;
+
+                        setTimeout(resetUploadArea, 3000);
+                    }
+                }
+            }
+        }
+
+        function resetUploadArea() {
+            uploadArea.innerHTML = `
+                <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                <h3>Deploy a New Site</h3>
+                <p>Drag & drop your files or click to browse</p>
+            `;
+            fileInput.value = '';
+        }
+
+        async function deleteSite(subdomain) {
+            if (confirm('Are you sure you want to delete this site?')) {
+                try {
+                    const response = await fetch(`/sites/${subdomain}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        // Remove the site item from the DOM
+                        const siteItem = document.querySelector(`[data-subdomain="${subdomain}"]`);
+                        if (siteItem) {
+                            siteItem.remove();
+                            
+                            // Check if there are no more sites
+                            const sitesContainer = document.querySelector('.sites-container');
+                            if (!sitesContainer.querySelector('.site-item')) {
+                                // Show empty state
+                                sitesContainer.innerHTML = `
+                                    <div class="empty-state">
+                                        <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                        </svg>
+                                        <p>No sites deployed yet. Deploy your first site above!</p>
+                                    </div>
+                                `;
+                            }
+                        }
+                    } else {
+                        throw new Error(data.error || 'Failed to delete site');
+                    }
+                } catch (error) {
+                    console.error('Error deleting site:', error);
+                    alert(error.message || 'Failed to delete site. Please try again.');
+                }
+            }
+        }
+
+        // Header scroll effect
+        const header = document.querySelector('.header');
+        window.addEventListener('scroll', () => {
+            const scrolled = window.scrollY > 50;
+            header.style.backgroundColor = scrolled ? 
+                'rgba(255, 255, 255, 0.95)' : 
+                'rgba(255, 255, 255, 0.9)';
+            header.style.boxShadow = scrolled ?
+                '0 4px 15px rgba(0,0,0,0.07)' :
+                '0 2px 10px rgba(0,0,0,0.05)';
+        });
+    </script>
+
+    <!-- Delete Confirmation Dialog -->
+    <div id="deleteOverlay" class="overlay" style="display: none;"></div>
+    <div id="deleteConfirmationDialog" class="subdomain-dialog" style="display: none;">
+        <h3>Confirm Deletion</h3>
+        <p>Type 'DELETE' to confirm that you want to delete this site. This action cannot be undone.</p>
+        <div class="subdomain-input-group">
+            <input type="text" id="deleteSubdomain" placeholder="Type 'DELETE' to confirm">
+        </div>
+        <div id="deleteError" class="subdomain-error">Please type 'DELETE' to confirm.</div>
+        <div class="dialog-buttons">
+            <button class="btn btn-cancel" onclick="hideDeleteConfirmation()">Cancel</button>
+            <button class="btn btn-delete" id="confirmDeleteBtn">Confirm Delete</button>
+        </div>
+    </div>
+</body>
+</html>

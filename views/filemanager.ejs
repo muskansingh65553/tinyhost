@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Manager - <%= site.subdomain %> | TinyHost</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/monaco-editor@0.33.0/min/vs/editor/editor.main.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-orange: #FF8C00;
+            --secondary-orange: #FFA500;
+            --gradient: linear-gradient(135deg, var(--secondary-orange) 0%, var(--primary-orange) 100%);
+            --text-dark: #2d3436;
+            --text-light: #636e72;
+            --bg-light: #fdfdfd;
+            --white: #ffffff;
+            --border-color: #dfe6e9;
+            --shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 8px 25px rgba(255, 140, 0, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #fff5f0 0%, #fff9f5 100%);
+            color: var(--text-dark);
+            line-height: 1.7;
+        }
+
+        .header {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 40px);
+            max-width: 1200px;
+            z-index: 1000;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(8px);
+            padding: 18px 30px;
+            border-radius: 20px;
+        }
+
+        .container {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            color: transparent;
+            text-decoration: none;
+            letter-spacing: -1px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            font-weight: 500;
+            color: var(--text-dark);
+            text-decoration: none;
+            position: relative;
+            padding: 8px 15px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-orange);
+            background: rgba(255, 140, 0, 0.08);
+        }
+
+        .file-manager-section {
+            padding-top: 120px;
+            padding-bottom: 40px;
+        }
+
+        .file-manager-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .file-manager-header h1 {
+            font-size: 2rem;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .file-manager-header h1::before {
+            content: '';
+            display: block;
+            width: 4px;
+            height: 24px;
+            background: var(--gradient);
+            border-radius: 2px;
+        }
+
+        .deploy-btn {
+            background: var(--gradient);
+            color: var(--white);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .deploy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .deploy-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .file-manager-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 30px;
+            height: calc(100vh - 200px);
+        }
+
+        .file-tree {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            overflow-y: auto;
+        }
+
+        .file-tree-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .file-tree-header h2 {
+            font-size: 1.2rem;
+            color: var(--text-dark);
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 4px;
+            user-select: none;
+        }
+
+        .file-item:hover {
+            background: rgba(255, 140, 0, 0.08);
+        }
+
+        .file-item.active {
+            background: rgba(255, 140, 0, 0.15);
+            color: var(--primary-orange);
+            font-weight: 500;
+        }
+
+        .file-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            color: var(--text-light);
+        }
+
+        .file-name {
+            font-size: 0.95rem;
+            color: var(--text-dark);
+        }
+
+        .editor-container {
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            border: 1px solid var(--border-color);
+        }
+
+        .editor-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+        }
+
+        .editor-header h3 {
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .editor-header h3::before {
+            content: '';
+            display: block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary-orange);
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .editor-btn {
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 140px;
+            justify-content: center;
+        }
+
+        .save-btn {
+            background: var(--gradient);
+            color: var(--white);
+            border: none;
+        }
+
+        .save-btn:not(:disabled):hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .save-btn:disabled {
+            opacity: 0.8;
+            cursor: not-allowed;
+            background: #94a3b8;
+        }
+
+        .save-btn .deploying-text {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .save-btn .deploying-dots {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            margin-left: 4px;
+        }
+
+        .save-btn .deploying-dots span {
+            width: 4px;
+            height: 4px;
+            background: currentColor;
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+
+        .save-btn .deploying-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .save-btn .deploying-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        #editor {
+            flex: 1;
+            position: relative;
+            height: calc(100% - 60px) !important;
+            overflow: hidden;
+        }
+
+        /* Monaco Editor Customization */
+        .monaco-editor {
+            padding: 15px 0;
+            background: #fafafa !important;
+        }
+
+        .monaco-editor .margin {
+            background: #fafafa !important;
+        }
+
+        .monaco-editor .cursors-layer .cursor {
+            background: var(--primary-orange) !important;
+            border-color: var(--primary-orange) !important;
+        }
+
+        .monaco-editor .line-numbers {
+            color: #94a3b8 !important;
+            font-size: 13px !important;
+        }
+
+        .monaco-editor .current-line {
+            border: none !important;
+            background: #fff8f3 !important;
+        }
+
+        .monaco-editor .view-overlays .current-line {
+            border: none !important;
+            background: #fff8f3 !important;
+        }
+
+        .monaco-editor .minimap-slider {
+            background: rgba(255, 140, 0, 0.2) !important;
+        }
+
+        .monaco-editor .minimap-slider:hover {
+            background: rgba(255, 140, 0, 0.3) !important;
+        }
+
+        /* Editor Scrollbar Customization */
+        .monaco-scrollable-element > .scrollbar > .slider {
+            background: rgba(255, 140, 0, 0.2) !important;
+            border-radius: 10px !important;
+        }
+
+        .monaco-scrollable-element > .scrollbar > .slider:hover {
+            background: rgba(255, 140, 0, 0.3) !important;
+        }
+
+        .monaco-scrollable-element > .scrollbar {
+            width: 12px !important;
+        }
+
+        /* Selection Color */
+        .monaco-editor .selected-text {
+            background: rgba(255, 140, 0, 0.1) !important;
+        }
+
+        /* Indent Guide Lines */
+        .monaco-editor .indent-guide {
+            border-left: 1px solid rgba(0, 0, 0, 0.05) !important;
+        }
+
+        /* Active Indent Guide */
+        .monaco-editor .indent-guide.active {
+            border-left: 1px solid rgba(255, 140, 0, 0.3) !important;
+        }
+
+        .directory-children {
+            margin-left: 15px;
+            border-left: 1px dashed var(--border-color);
+            margin-top: 4px;
+            margin-bottom: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            border-radius: 12px;
+            color: var(--white);
+            font-weight: 500;
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.success {
+            background: #22c55e;
+        }
+
+        .notification.error {
+            background: #ef4444;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .file-manager-grid {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .file-tree {
+                height: 300px;
+            }
+
+            .editor-container {
+                height: 500px;
+            }
+        }
+
+        /* Add styles for the modal */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+        }
+
+        .modal {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--shadow);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+        }
+
+        .modal-description {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .modal-btn.cancel {
+            background: #f1f5f9;
+            color: var(--text-dark);
+            border: none;
+        }
+
+        .modal-btn.confirm {
+            background: var(--gradient);
+            color: var(--white);
+            border: none;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .modal-btn.confirm:hover {
+            box-shadow: var(--shadow-hover);
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <a href="/" class="logo">TinyHost</a>
+            <nav class="nav-links">
+                <a href="/dashboard">Dashboard</a>
+                <a href="/filemanager/<%= site.subdomain %>" class="active">File Manager</a>
+                <a href="/logout">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="file-manager-section">
+        <div class="container">
+            <div class="file-manager-header">
+                <h1>File Manager - <%= site.subdomain %></h1>
+            
+            </div>
+
+            <div class="file-manager-grid">
+                <div class="file-tree">
+                    <div class="file-tree-header">
+                        <h2>Files</h2>
+                    </div>
+                    <div id="fileTree" class="space-y-1">
+                        <!-- File tree will be populated here -->
+                    </div>
+                </div>
+
+                <div class="editor-container">
+                    <div class="editor-header">
+                        <h3 id="currentFile">Select a file to edit</h3>
+                        <div class="editor-actions">
+                            <button id="saveAndDeployBtn" class="editor-btn save-btn" disabled>
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                                </svg>
+                                <span>Save & Deploy</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="editor"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="modal-backdrop" id="deployModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Save & Deploy Changes</h3>
+                <p class="modal-description">This will save your current changes and deploy them to your live site. Are you sure you want to continue?</p>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" id="cancelDeploy">Cancel</button>
+                <button class="modal-btn confirm" id="confirmDeploy">
+                    <span>Save & Deploy</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.33.0/min/vs/loader.js"></script>
+    <script>
+        let editor;
+        let currentFile = null;
+        let saveTimeout;
+        let activeFileElement = null;
+
+        // Initialize Monaco Editor with better configuration
+        require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.33.0/min/vs' }});
+        require(['vs/editor/editor.main'], function() {
+            monaco.editor.defineTheme('tinyhost', {
+                base: 'vs',
+                inherit: true,
+                rules: [
+                    { token: 'comment', foreground: '6e7f8d' },
+                    { token: 'keyword', foreground: 'FF8C00' },
+                    { token: 'string', foreground: '2ea043' },
+                    { token: 'number', foreground: 'FF8C00' },
+                    { token: 'type', foreground: '6639ba' }
+                ],
+                colors: {
+                    'editor.background': '#fafafa',
+                    'editor.foreground': '#24292f',
+                    'editor.lineHighlightBackground': '#fff8f3',
+                    'editor.selectionBackground': '#FF8C0020',
+                    'editor.inactiveSelectionBackground': '#FF8C0010',
+                    'editorCursor.foreground': '#FF8C00',
+                    'editorWhitespace.foreground': '#f0f0f0',
+                    'editorLineNumber.foreground': '#94a3b880',
+                    'editorLineNumber.activeForeground': '#FF8C00',
+                    'editor.selectionHighlightBackground': '#FF8C0015',
+                    'editor.wordHighlightBackground': '#FF8C0010',
+                    'editor.wordHighlightStrongBackground': '#FF8C0020',
+                    'editorBracketMatch.background': '#FF8C0020',
+                    'editorBracketMatch.border': '#FF8C0040'
+                }
+            });
+
+            editor = monaco.editor.create(document.getElementById('editor'), {
+                value: 'Select a file to edit',
+                language: 'plaintext',
+                theme: 'tinyhost',
+                minimap: { 
+                    enabled: true,
+                    scale: 10,
+                    showSlider: 'mouseover'
+                },
+                fontSize: 14,
+                fontFamily: "'SF Mono', Consolas, 'Courier New', monospace",
+                lineNumbers: 'on',
+                roundedSelection: true,
+                scrollBeyondLastLine: false,
+                readOnly: false,
+                cursorStyle: 'line',
+                cursorWidth: 2,
+                cursorBlinking: 'smooth',
+                renderWhitespace: 'selection',
+                smoothScrolling: true,
+                mouseWheelZoom: true,
+                padding: {
+                    top: 20,
+                    bottom: 20
+                },
+                lineHeight: 1.6,
+                letterSpacing: 0.5,
+                formatOnPaste: true,
+                formatOnType: true,
+                autoIndent: 'advanced',
+                matchBrackets: 'always',
+                renderIndentGuides: true,
+                scrollbar: {
+                    vertical: 'visible',
+                    horizontal: 'visible',
+                    verticalScrollbarSize: 12,
+                    horizontalScrollbarSize: 12,
+                    verticalHasArrows: false,
+                    horizontalHasArrows: false,
+                    useShadows: false
+                }
+            });
+
+            // Load initial file tree after editor is initialized
+            loadFileTree();
+
+            window.addEventListener('resize', () => {
+                editor.layout();
+            });
+        });
+
+        // Load file tree with better error handling
+        async function loadFileTree() {
+            try {
+                const response = await fetch(`/api/sites/<%= site.subdomain %>/files`);
+                if (!response.ok) {
+                    throw new Error(`Failed to load files: ${response.statusText}`);
+                }
+                const tree = await response.json();
+                if (!Array.isArray(tree)) {
+                    throw new Error('Invalid file tree data');
+                }
+                renderFileTree(tree);
+
+                // Auto select first file
+                const firstFile = findFirstFile(tree);
+                if (firstFile) {
+                    const fileElement = document.querySelector(`[data-path="${firstFile.path}"]`);
+                    if (fileElement) {
+                        openFile(firstFile, fileElement);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading file tree:', error);
+                showNotification('Error loading files: ' + error.message, 'error');
+                document.getElementById('fileTree').innerHTML = `
+                    <div class="file-item error">
+                        <svg class="file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        <span class="file-name">Error loading files</span>
+                    </div>
+                `;
+            }
+        }
+
+        // Helper function to find the first file in the tree
+        function findFirstFile(items) {
+            // Sort items to ensure directories come first (for visual consistency)
+            items.sort((a, b) => {
+                if (a.type === b.type) {
+                    return a.name.localeCompare(b.name);
+                }
+                return a.type === 'directory' ? -1 : 1;
+            });
+
+            for (const item of items) {
+                if (item.type === 'file') {
+                    return item;
+                } else if (item.type === 'directory' && item.children && item.children.length > 0) {
+                    const firstFile = findFirstFile(item.children);
+                    if (firstFile) {
+                        return firstFile;
+                    }
+                }
+            }
+            return null;
+        }
+
+        // Render file tree with improved structure
+        function renderFileTree(items) {
+            const container = document.getElementById('fileTree');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            if (items.length === 0) {
+                container.innerHTML = `
+                    <div class="file-item empty">
+                        <svg class="file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                        </svg>
+                        <span class="file-name">No files found</span>
+                    </div>
+                `;
+                return;
+            }
+
+            function renderItem(item, level = 0) {
+                const div = document.createElement('div');
+                div.className = `file-item ${item.type}`;
+                div.style.paddingLeft = `${level * 1.5 + 1}rem`;
+                div.dataset.path = item.path;
+                div.dataset.type = item.type;
+
+                const icon = item.type === 'directory' ? 
+                    '<svg class="file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>' :
+                    '<svg class="file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>';
+
+                div.innerHTML = `
+                    ${icon}
+                    <span class="file-name">${item.name}</span>
+                `;
+
+                if (item.type === 'directory') {
+                    div.onclick = (e) => {
+                        e.stopPropagation();
+                        toggleDirectory(div, item);
+                    };
+                    if (item.children && item.children.length > 0) {
+                        const childContainer = document.createElement('div');
+                        childContainer.className = 'directory-children';
+                        childContainer.style.display = 'none';
+                        item.children.forEach(child => {
+                            childContainer.appendChild(renderItem(child, level + 1));
+                        });
+                        div.appendChild(childContainer);
+                    }
+                } else {
+                    div.onclick = (e) => {
+                        e.stopPropagation();
+                        openFile(item, div);
+                    };
+                }
+
+                return div;
+            }
+
+            // Sort items: directories first, then files
+            items.sort((a, b) => {
+                if (a.type === b.type) {
+                    return a.name.localeCompare(b.name);
+                }
+                return a.type === 'directory' ? -1 : 1;
+            });
+
+            items.forEach(item => {
+                container.appendChild(renderItem(item));
+            });
+        }
+
+        // Toggle directory with animation
+        function toggleDirectory(element, item) {
+            const childContainer = element.querySelector('.directory-children');
+            if (childContainer) {
+                const isExpanded = childContainer.style.display !== 'none';
+                childContainer.style.display = isExpanded ? 'none' : 'block';
+                
+                const icon = element.querySelector('.file-icon');
+                if (icon) {
+                    icon.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(90deg)';
+                    icon.style.transition = 'transform 0.2s ease';
+                }
+            }
+        }
+
+        // Open file with improved error handling
+        async function openFile(file, element) {
+            try {
+                // Remove active class from previous file
+                if (activeFileElement) {
+                    activeFileElement.classList.remove('active');
+                }
+                
+                // Add active class to current file
+                element.classList.add('active');
+                activeFileElement = element;
+
+                const response = await fetch(`/api/sites/<%= site.subdomain %>/files/${file.path}`);
+                if (!response.ok) {
+                    throw new Error('Failed to load file content');
+                }
+                
+                const data = await response.json();
+                if (!data.content) {
+                    throw new Error('Invalid file content');
+                }
+
+                // Update editor content and language
+                const extension = file.name.split('.').pop().toLowerCase();
+                const language = getLanguageFromExtension(extension);
+                
+                const model = editor.getModel();
+                if (model) {
+                    monaco.editor.setModelLanguage(model, language);
+                }
+                
+                editor.setValue(data.content);
+                currentFile = file;
+                
+                // Update UI
+                document.getElementById('currentFile').textContent = file.name;
+                document.getElementById('saveAndDeployBtn').disabled = false;
+                
+            } catch (error) {
+                console.error('Error opening file:', error);
+                showNotification('Error opening file: ' + error.message, 'error');
+            }
+        }
+
+        // Get language from extension
+        function getLanguageFromExtension(extension) {
+            const languageMap = {
+                'js': 'javascript',
+                'jsx': 'javascript',
+                'ts': 'typescript',
+                'tsx': 'typescript',
+                'html': 'html',
+                'css': 'css',
+                'json': 'json',
+                'md': 'markdown',
+                'py': 'python',
+                'java': 'java',
+                'cpp': 'cpp',
+                'c': 'c',
+                'go': 'go',
+                'rs': 'rust',
+                'php': 'php',
+                'rb': 'ruby',
+                'swift': 'swift',
+                'kt': 'kotlin',
+                'sh': 'shell',
+                'sql': 'sql',
+                'xml': 'xml',
+                'yaml': 'yaml',
+                'yml': 'yaml'
+            };
+            return languageMap[extension] || 'plaintext';
+        }
+
+        // Update the save and deploy functionality
+        async function saveAndDeploy() {
+            if (!currentFile) return;
+
+            const button = document.getElementById('saveAndDeployBtn');
+            
+            try {
+                // Lock button and show deploying state
+                button.disabled = true;
+                button.innerHTML = `
+                    <div class="deploying-text">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        <span>Deploying</span>
+                        <div class="deploying-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                `;
+
+                // First save the file
+                const content = editor.getValue();
+                if (content === undefined) {
+                    throw new Error('No content to save');
+                }
+
+                const saveResponse = await fetch(`/api/sites/<%= site.subdomain %>/files/${currentFile.path}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ content })
+                });
+
+                if (!saveResponse.ok) {
+                    throw new Error('Failed to save file');
+                }
+
+                // Deploy the changes
+                const deployResponse = await fetch(`/api/sites/<%= site.subdomain %>/deploy`, {
+                    method: 'POST'
+                });
+
+                if (!deployResponse.ok) {
+                    throw new Error('Deployment failed');
+                }
+
+                // Show deployed state
+                button.innerHTML = `
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <span>Deployed</span>
+                `;
+
+                showNotification('Changes deployed successfully', 'success');
+
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    button.disabled = false;
+                    button.innerHTML = `
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                        </svg>
+                        <span>Save & Deploy</span>
+                    `;
+                }, 2000);
+
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification(error.message, 'error');
+                
+                // Reset button on error
+                button.disabled = false;
+                button.innerHTML = `
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                    </svg>
+                    <span>Save & Deploy</span>
+                `;
+            }
+        }
+
+        // Event listeners
+        document.getElementById('saveAndDeployBtn').addEventListener('click', saveAndDeploy);
+
+        // Auto-save functionality
+        editor?.onDidChangeModelContent(() => {
+            if (!currentFile) return;
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(async () => {
+                try {
+                    const content = editor.getValue();
+                    if (content === undefined) return;
+
+                    const response = await fetch(`/api/sites/<%= site.subdomain %>/files/${currentFile.path}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ content })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to auto-save file');
+                    }
+                } catch (error) {
+                    console.error('Auto-save error:', error);
+                }
+            }, 1000);
+        });
+
+        // Show notification with loading indicator
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            // Remove any existing notifications
+            const existingNotifications = document.querySelectorAll('.notification');
+            existingNotifications.forEach(n => n.remove());
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html> 

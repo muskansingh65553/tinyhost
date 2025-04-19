@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TinyHost - Deploy Your Site</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .upload-container {
+            transition: all 0.3s ease;
+        }
+        .upload-container:hover {
+            transform: translateY(-2px);
+        }
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen">
+    <div class="container mx-auto px-4 py-12">
+        <div class="max-w-2xl mx-auto">
+            <div class="text-center mb-12">
+                <h1 class="text-4xl font-bold text-gray-800 mb-4">TinyHost</h1>
+                <p class="text-gray-600">Deploy your static site in seconds</p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg p-8 upload-container">
+                <form id="uploadForm" action="/deploy" method="POST" enctype="multipart/form-data" class="space-y-6">
+                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center">
+                        <input type="file" name="zipFile" id="zipFile" accept=".zip" class="hidden" required>
+                        <label for="zipFile" class="cursor-pointer">
+                            <div class="space-y-2">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                <p class="text-gray-600">Click to upload your ZIP file</p>
+                                <p class="text-sm text-gray-500">Only .zip files are accepted</p>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div id="fileName" class="text-center text-sm text-gray-500 hidden"></div>
+
+                    <button type="submit" class="w-full bg-blue-600 text-white py-3 px-6 rounded-xl font-medium hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        Deploy Site
+                    </button>
+                </form>
+
+                <div id="loading" class="hidden mt-6 text-center">
+                    <div class="loading-spinner inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full"></div>
+                    <p class="mt-2 text-gray-600">Deploying your site...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('zipFile');
+        const fileNameDisplay = document.getElementById('fileName');
+        const uploadForm = document.getElementById('uploadForm');
+        const loadingIndicator = document.getElementById('loading');
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                fileNameDisplay.textContent = `Selected: ${e.target.files[0].name}`;
+                fileNameDisplay.classList.remove('hidden');
+            } else {
+                fileNameDisplay.classList.add('hidden');
+            }
+        });
+
+        uploadForm.addEventListener('submit', () => {
+            loadingIndicator.classList.remove('hidden');
+            uploadForm.classList.add('hidden');
+        });
+    </script>
+</body>
+</html> 
